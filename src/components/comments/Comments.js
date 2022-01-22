@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react/cjs/react.development';
 
@@ -25,9 +25,9 @@ const Comments = () => {
     setIsAddingComment(true);
   };
   
-  const onAddedCommentHandler = () => {
-
-  };
+  const onAddedCommentHandler = useCallback(() => {
+    sendRequest(quoteId);
+  }, [sendRequest, quoteId]);
 
   let comments;
 
@@ -35,8 +35,12 @@ const Comments = () => {
     comments = <div className='centered'><LoadingSpinner /></div>
   }
 
-  if (status === 'completed' && loadedComments) {
-    comments = <CommentsList />
+  if (status === 'completed' && (loadedComments && loadedComments.length > 0)) {
+    comments = <CommentsList comments={loadedComments}/>
+  }
+
+  if (status === 'completed' && (!loadedComments || loadedComments.length === 0)) {
+    comments = <p className='centered'>No comments were added yet!</p>
   }
 
   return (
@@ -47,8 +51,8 @@ const Comments = () => {
           Add a Comment
         </button>
       )}
-      {isAddingComment && <NewCommentForm quoteId={params.quoteId} onAddedComment={onAddedCommentHandler} />}
-      <p>Comments...</p>
+      {isAddingComment && <NewCommentForm quoteId={quoteId} onAddedComment={onAddedCommentHandler} />}
+      {comments}
     </section>
   );
 };
